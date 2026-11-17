@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Audiobook° — Generative Audiobook Studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<header class="nav shell">
+  <a class="wordmark" href="#studio">audiobook<span>°</span></a>
+  <nav><a href="#studio">Studio</a><a href="#how">How it works</a><a href="#library">Library</a></nav>
+  <div class="nav-actions"><button class="pill outline" id="demoBtn">Try demo</button><button class="pill dark" id="topUploadBtn">Create audiobook</button></div>
+</header>
+
+<main>
+<section class="hero shell" id="studio">
+  <div class="hero-copy">
+    <div class="eyebrow">AI AUDIOBOOK STUDIO · FREE</div>
+    <h1>Give your book<br>a voice.</h1>
+    <p class="lede">Upload a text PDF. We extract the words, shape them into chapters, and turn each chapter into clear, natural spoken audio.</p>
+    <div class="hero-actions"><button class="pill dark" id="heroUploadBtn">Create an audiobook</button><a class="pill outline" href="#how">How it works</a></div>
+    <div class="hero-note"><span class="dot"></span> PDFMiner · NLTK · female neural voice · SQLite library</div>
+  </div>
+  <div class="hero-visual" aria-label="Abstract audiobook audio artwork">
+    <img src="/assets/hero-audio.svg" alt="Abstract editorial audio sphere">
+    <div class="visual-caption"><span>01</span><strong>VOICE / TEXT / FORM</strong><span>FREE STUDIO</span></div>
+  </div>
+</section>
+
+<section class="feature shell" id="how">
+  <div class="feature-grid">
+    <div class="feature-copy">
+      <div class="section-kicker">ONE FILE IN</div>
+      <h2>A simple path from page to playback.</h2>
+      <p><b>01 Upload.</b> Your PDF is stored in the local SQLite database and read with PDFMiner. <b>02 Shape.</b> NLP keeps sentences together and creates chapters. <b>03 Listen.</b> Generate one chapter at a time and play it directly from its card.</p>
+      <div class="process"><div><b>01</b><span>PDF</span></div><i></i><div><b>02</b><span>NLP</span></div><i></i><div><b>03</b><span>VOICE</span></div></div>
+    </div>
+    <div class="upload-card" id="dropzone">
+      <div class="upload-mark"><div class="paper"></div><div class="sound-lines"><i></i><i></i><i></i><i></i><i></i></div></div>
+      <strong>Drop your PDF here</strong>
+      <p>Text-based PDFs · up to 50 MB · saved to your library</p>
+      <button class="pill dark small" id="chooseBtn">Choose PDF</button>
+      <input type="file" id="pdfInput" accept="application/pdf,.pdf" hidden>
+      <div class="upload-status" id="uploadStatus">Ready</div>
+    </div>
+  </div>
+</section>
+
+<section class="library-band" id="library">
+<div class="shell">
+  <div class="section-head"><div><div class="section-kicker">YOUR LIBRARY</div><h2 id="bookTitle">Nothing uploaded yet</h2></div><div class="status" id="status">Waiting for a PDF</div></div>
+
+  <div class="library-files" id="libraryFiles"></div>
+
+  <div class="library-grid">
+    <aside class="chapters"><div class="chapter-header"><span>CHAPTERS</span><span id="chapterHint">—</span></div><div id="chapterList"><div class="empty">Upload a PDF above. Your chapters will appear here.</div></div></aside>
+    <section class="player-card">
+      <div class="player-art"><img src="/assets/hero-audio.svg" alt="Audiobook artwork"></div>
+      <div class="now"><div class="section-kicker">NOW READING</div><h3 id="nowTitle">Your first chapter will appear here.</h3><p id="nowPreview">Upload a PDF to extract text and create your audiobook.</p></div>
+      <div class="player-message" id="playerMessage">Choose a chapter, then generate its voice.</div>
+      <audio id="audio" controls preload="metadata"></audio>
+      <div class="progress-wrap" id="progressWrap" hidden><div class="progress-label"><span id="progressMessage">Preparing…</span><span id="progressPercent">0%</span></div><div class="progress"><span id="progressBar"></span></div></div>
+      <div class="player-tools"><button class="pill outline small" id="backBtn">← Previous</button><button class="pill dark small" id="generateBtn">Generate this chapter</button><button class="pill outline small" id="previewBtn">Preview in browser</button><button class="pill outline small" id="nextBtn">Next →</button><a class="pill outline small disabled" id="downloadBtn" href="#" download>Download WAV</a></div>
+    </section>
+  </div>
+</div>
+</section>
+
+<section class="shell stats"><div><strong id="wordCount">—</strong><span>words processed</span></div><div><strong id="chapterCount">—</strong><span>chapters shaped by NLP</span></div><div><strong id="modelName">Female MMS</strong><span>neural voice model</span></div><div><strong id="deviceName">—</strong><span>inference device</span></div></section>
+</main>
+<footer class="footer shell"><span>Generative Audiobook Studio</span><span>PDFMiner · NLTK · Female MMS VITS · SQLite</span></footer>
+<script src="/app.js"></script>
+</body>
+</html>

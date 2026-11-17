@@ -1,0 +1,26 @@
+<svg width="720" height="720" viewBox="0 0 720 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <radialGradient id="g" cx="36%" cy="30%" r="78%">
+    <stop offset="0" stop-color="#FFB2D5"/>
+    <stop offset=".32" stop-color="#FF6A82"/>
+    <stop offset=".63" stop-color="#FF4704"/>
+    <stop offset=".83" stop-color="#8D42FF"/>
+    <stop offset="1" stop-color="#0447FF"/>
+  </radialGradient>
+  <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+    <stop offset="0" stop-color="#fff" stop-opacity=".30"/>
+    <stop offset="1" stop-color="#fff" stop-opacity="0"/>
+  </radialGradient>
+  <filter id="blur"><feGaussianBlur stdDeviation="28"/></filter>
+</defs>
+<circle cx="360" cy="360" r="285" fill="#FF4704" opacity=".12" filter="url(#blur)"/>
+<circle cx="360" cy="360" r="258" fill="url(#g)"/>
+<circle cx="315" cy="280" r="150" fill="url(#glow)" opacity=".45"/>
+<circle cx="360" cy="360" r="258" stroke="#fff" stroke-opacity=".15" stroke-width="2"/>
+<circle cx="360" cy="360" r="40" fill="#fff"/>
+<path d="M350 338L386 360L350 382V338Z" fill="#000"/>
+<g opacity=".42" stroke="#fff" stroke-width="2">
+  <path d="M124 360C176 270 220 225 300 190"/><path d="M596 360C544 270 500 225 420 190"/>
+  <path d="M155 475C220 535 274 560 360 565"/><path d="M565 475C500 535 446 560 360 565"/>
+</g>
+</svg>
