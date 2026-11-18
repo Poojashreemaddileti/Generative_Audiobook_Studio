@@ -1,56 +1,57 @@
 import re
-import re
-import nltk
 
-try:
-    nltk.data.find("tokenizers/punkt")
-except LookupError:
-    nltk.download("punkt", quiet=True)
-
-try:
-    nltk.data.find("tokenizers/punkt_tab")
-except LookupError:
-    nltk.download("punkt_tab", quiet=True)
+HEADING = re.compile(r"(?im)^\s*((?:chapter|part|section)\s+[\wivxlcdm.-]+[^\n]*|[0-9]{1,2}[.)]\s+[^\n]{2,80})\s*$")
 
 
-def sentence_split(text: str) -> list[str]:
-    # Prefer NLTK Punkt. If its language data is unavailable in an offline
-    # environment, use a deterministic punctuation fallback rather than fail.
-    try:
-        return [s.strip() for s in nltk.sent_tokenize(text) if s.strip()]
-    except LookupError:
-        parts = re.split(r"(?<=[.!?])\s+", text)
-        return [s.strip() for s in parts if s.strip()]
-
-
-def make_chapters(text: str, max_chars: int = 5500) -> list[dict]:
-    sentences = sentence_split(text)
-    chapters = []
-    current = []
-    current_len = 0
-
-    for sentence in sentences:
-        # Keep sentence boundaries intact for narration.
-        if current and current_len + len(sentence) + 1 > max_chars:
-            chapters.append({
-                "title": f"Chapter {len(chapters) + 1}",
-                "text": " ".join(current),
-            })
-            current = []
-            current_len = 0
-
-        current.append(sentence)
-        current_len += len(sentence) + 1
-
+def _split_long_text(text, limit):
+    paragraphs = [p.strip() for p in re.split(r"\n\s*\n", text) if p.strip()]
+    chunks, current = [], ""
+    for paragraph in paragraphs:
+        while len(paragraph) > limit:
+            if current:
+                chunks.append(current.strip())
+                current = ""
+            cut = paragraph.rfind(" ", 0, limit)
+            if cut < limit // 2:
+                cut = limit
+            chunks.append(paragraph[:cut].strip())
+            paragraph = paragraph[cut:].strip()
+        candidate = (current + "\n\n" + paragraph).strip() if current else paragraph
+        if len(candidate) <= limit:
+            current = candidate
+        else:
+            if current:
+                chunks.append(current.strip())
+            current = paragraph
     if current:
-        chapters.append({
-            "title": f"Chapter {len(chapters) + 1}",
-            "text": " ".join(current),
-        })
-
-    return chapters
+        chunks.append(current.strip())
+    return chunks
 
 
-def summarize_for_ui(text: str, limit: int = 220) -> str:
-    compact = re.sub(r"\s+", " ", text).strip()
-    return compact if len(compact) <= limit else compact[:limit].rsplit(" ", 1)[0] + "…"
+def make_chapters(text, max_chars=5500):
+    matches = list(HEADING.finditer(text))
+    sections = []
+    if matches:
+        if text[:matches[0].start()].strip():
+            sections.append(("Introduction", text[:matches[0].start()].strip()))
+        for i, match in enumerate(matches):
+            end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+            body = text[match.end():end].strip()
+            if body:
+                sections.append((match.group(1).strip(), body))
+    if not sections:
+        sections = [("Chapter 1", text.strip())]
+
+    result = []
+    for title, body in sections:
+        parts = _split_long_text(body, max_chars)
+        for part_index, part in enumerate(parts):
+            part_title = title if len(parts) == 1 else f"{title} · Part {part_index + 1}"
+            result.append({"title": part_title, "text": part})
+    return result
+
+
+def summarize_for_ui(text):
+    sentences = re.split(r"(?<=[.!?])\s+", text.strip())
+    summary = " ".join(s for s in sentences[:3] if s)
+    return (summary[:500] + "…") if len(summary) > 500 else summary

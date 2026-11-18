@@ -2,77 +2,73 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Audiobook° — Generative Audiobook Studio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#103c3a">
+  <meta name="description" content="Turn text-based PDFs into natural-sounding audiobooks with a female neural voice.">
+  <title>Generative Audiobook Studio</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
-<header class="nav shell">
-  <a class="wordmark" href="#studio">audiobook<span>°</span></a>
-  <nav><a href="#studio">Studio</a><a href="#how">How it works</a><a href="#library">Library</a></nav>
-  <div class="nav-actions"><button class="pill outline" id="demoBtn">Try demo</button><button class="pill dark" id="topUploadBtn">Create audiobook</button></div>
+<header class="topbar">
+  <a class="brand" href="#studio" aria-label="Generative Audiobook Studio home"><span class="brand-mark">♫</span><span>Generative<br><b>Audiobook Studio</b></span></a>
+  <nav class="main-nav" aria-label="Main navigation"><a class="active" href="#studio">Studio</a><a href="#how">How it works</a><a href="#library">My library</a></nav>
+  <div class="nav-actions"><button class="button button-quiet" id="demoBtn" type="button">Try a demo</button><button class="button button-gold" id="topUploadBtn" type="button">＋ Create audiobook</button></div>
 </header>
-
 <main>
-<section class="hero shell" id="studio">
-  <div class="hero-copy">
-    <div class="eyebrow">AI AUDIOBOOK STUDIO · FREE</div>
-    <h1>Give your book<br>a voice.</h1>
-    <p class="lede">Upload a text PDF. We extract the words, shape them into chapters, and turn each chapter into clear, natural spoken audio.</p>
-    <div class="hero-actions"><button class="pill dark" id="heroUploadBtn">Create an audiobook</button><a class="pill outline" href="#how">How it works</a></div>
-    <div class="hero-note"><span class="dot"></span> PDFMiner · NLTK · female neural voice · SQLite library</div>
-  </div>
-  <div class="hero-visual" aria-label="Abstract audiobook audio artwork">
-    <img src="assets/hero-audio.svg" alt="Abstract editorial audio sphere">
-    <div class="visual-caption"><span>01</span><strong>VOICE / TEXT / FORM</strong><span>FREE STUDIO</span></div>
-  </div>
-</section>
-
-<section class="feature shell" id="how">
-  <div class="feature-grid">
-    <div class="feature-copy">
-      <div class="section-kicker">ONE FILE IN</div>
-      <h2>A simple path from page to playback.</h2>
-      <p><b>01 Upload.</b> Your PDF is stored in the local SQLite database and read with PDFMiner. <b>02 Shape.</b> NLP keeps sentences together and creates chapters. <b>03 Listen.</b> Generate one chapter at a time and play it directly from its card.</p>
-      <div class="process"><div><b>01</b><span>PDF</span></div><i></i><div><b>02</b><span>NLP</span></div><i></i><div><b>03</b><span>VOICE</span></div></div>
+  <section class="hero" id="studio">
+    <div class="hero-copy">
+      <div class="eyebrow"><span class="eyebrow-dot"></span> YOUR PERSONAL AUDIOBOOK WORKSPACE</div>
+      <h1>Your book.<br><em>Our voice.</em></h1>
+      <p class="hero-lede">Turn your favourite text-based PDFs into clear, natural audiobooks. Upload once, explore your chapters, and listen at your own pace.</p>
+      <div class="hero-actions"><button class="button button-gold button-large" id="heroUploadBtn" type="button">Create an audiobook <span>↗</span></button><a class="text-link" href="#how">Discover how it works <span>↓</span></a></div>
+      <div class="hero-points"><span><i>✓</i> Free to run locally</span><span><i>✓</i> Chapter-by-chapter audio</span><span><i>✓</i> Your private library</span></div>
     </div>
-    <div class="upload-card" id="dropzone">
-      <div class="upload-mark"><div class="paper"></div><div class="sound-lines"><i></i><i></i><i></i><i></i><i></i></div></div>
-      <strong>Drop your PDF here</strong>
-      <p>Text-based PDFs · up to 50 MB · saved to your library</p>
-      <button class="pill dark small" id="chooseBtn">Choose PDF</button>
-      <input type="file" id="pdfInput" accept="application/pdf,.pdf" hidden>
-      <div class="upload-status" id="uploadStatus">Ready</div>
+    <div class="hero-art-wrap"><div class="art-glow"></div><img class="hero-art" src="/assets/hero-audio.svg" alt="An open book with headphones and flowing audio waves"><div class="art-note"><span class="note-icon">♫</span><span><b>Stories, brought to life</b><small>Read less. Listen more.</small></span><span class="note-bars"><i></i><i></i><i></i><i></i><i></i></span></div></div>
+    <div class="hero-bottom"><span>01 / THE STUDIO</span><span>PDF → CHAPTERS → AUDIO</span></div>
+  </section>
+
+  <section class="how-section section-shell" id="how">
+    <div class="section-intro"><div class="eyebrow">A SIMPLE THREE-STEP FLOW</div><h2>From printed page<br>to <em>listening time.</em></h2><p>Everything you need to create and enjoy your own narrated reading experience.</p></div>
+    <div class="steps"><article class="step-card"><span class="step-number">01</span><div class="step-icon">⇧</div><h3>Upload your PDF</h3><p>Choose a text-based PDF or drag it into the upload area. Your book is saved in your local library.</p></article><article class="step-card"><span class="step-number">02</span><div class="step-icon">▤</div><h3>Shape your chapters</h3><p>Text is extracted and organised into readable chapters, keeping paragraphs and sentences together.</p></article><article class="step-card"><span class="step-number">03</span><div class="step-icon">♫</div><h3>Listen and enjoy</h3><p>Generate natural narration for each chapter, play it in the studio, or download the WAV file.</p></article></div>
+  </section>
+
+  <section class="workspace" id="upload">
+    <div class="section-shell workspace-inner">
+      <div class="workspace-heading"><div><div class="eyebrow">START A NEW LISTENING SESSION</div><h2>Bring a book <em>to life.</em></h2><p>Upload a text-based PDF to begin. Maximum file size: 50 MB.</p></div><div class="secure-note"><span>⌂</span> Stored locally on your computer</div></div>
+      <div class="upload-card" id="dropzone" tabindex="0" role="button" aria-label="Choose or drop a PDF file">
+        <div class="upload-symbol"><span class="file-symbol">PDF</span><span class="upload-arrow">↑</span></div>
+        <div class="upload-copy"><strong>Drop your PDF here</strong><p>or choose a file from your computer</p><small>Text-based PDFs work best. Scanned image-only PDFs are not supported.</small></div>
+        <button class="button button-teal" id="chooseBtn" type="button">Browse files</button>
+        <input type="file" id="pdfInput" accept="application/pdf,.pdf" hidden>
+        <div class="upload-status" id="uploadStatus" aria-live="polite">Ready when you are</div>
+      </div>
     </div>
-  </div>
-</section>
+  </section>
 
-<section class="library-band" id="library">
-<div class="shell">
-  <div class="section-head"><div><div class="section-kicker">YOUR LIBRARY</div><h2 id="bookTitle">Nothing uploaded yet</h2></div><div class="status" id="status">Waiting for a PDF</div></div>
+  <section class="library-section" id="library">
+    <div class="section-shell">
+      <div class="library-heading"><div><div class="eyebrow">YOUR PERSONAL COLLECTION</div><h2 id="bookTitle">Your library</h2><p class="library-subtitle">Pick up where you left off, or create something new.</p></div><div class="status-pill" id="status"><span></span> Waiting for a PDF</div></div>
+      <div class="library-files" id="libraryFiles"><div class="library-empty">Your uploaded books will appear here.</div></div>
+      <div class="library-grid">
+        <aside class="chapters-card"><div class="card-heading"><div><span class="eyebrow">YOUR BOOK</span><h3>Chapters</h3></div><span class="chapter-count" id="chapterHint">—</span></div><div id="chapterList" class="chapter-list"><div class="empty-state"><span>▤</span><b>No chapters yet</b><small>Upload a PDF and its chapters will appear here.</small></div></div></aside>
+        <section class="player-card">
+          <div class="player-topline"><span class="eyebrow">NOW PLAYING</span><span class="voice-tag"><span></span> FEMALE NEURAL VOICE</span></div>
+          <div class="player-main"><div class="player-cover"><img src="/assets/hero-audio.svg" alt="Open book and headphones illustration"></div><div class="track-info"><span class="track-kicker">YOUR AUDIOBOOK</span><h3 id="nowTitle">Your first chapter awaits.</h3><p id="nowPreview">Upload a PDF to extract its text and prepare your listening experience.</p></div></div>
+          <div class="player-message" id="playerMessage" aria-live="polite">Choose a chapter, then generate its narration.</div>
+          <audio id="audio" controls preload="metadata"></audio>
+          <div class="progress-wrap" id="progressWrap" hidden><div class="progress-label"><span id="progressMessage">Preparing your narration…</span><b id="progressPercent">0%</b></div><div class="progress-track"><span id="progressBar"></span></div></div>
+          <div class="player-tools"><button class="button button-outline button-small" id="backBtn" type="button">← Previous</button><button class="button button-gold generate-button" id="generateBtn" type="button" disabled>✦ Generate this chapter</button><button class="button button-outline button-small" id="previewBtn" type="button" disabled>Preview voice</button><button class="button button-outline button-small" id="nextBtn" type="button" disabled>Next →</button><a class="button button-outline button-small disabled" id="downloadBtn" href="#" download aria-disabled="true">↓ Download WAV</a></div>
+        </section>
+      </div>
+    </div>
+  </section>
 
-  <div class="library-files" id="libraryFiles"></div>
-
-  <div class="library-grid">
-    <aside class="chapters"><div class="chapter-header"><span>CHAPTERS</span><span id="chapterHint">—</span></div><div id="chapterList"><div class="empty">Upload a PDF above. Your chapters will appear here.</div></div></aside>
-    <section class="player-card">
-      <div class="player-art"><img src="/assets/hero-audio.svg" alt="Audiobook artwork"></div>
-      <div class="now"><div class="section-kicker">NOW READING</div><h3 id="nowTitle">Your first chapter will appear here.</h3><p id="nowPreview">Upload a PDF to extract text and create your audiobook.</p></div>
-      <div class="player-message" id="playerMessage">Choose a chapter, then generate its voice.</div>
-      <audio id="audio" controls preload="metadata"></audio>
-      <div class="progress-wrap" id="progressWrap" hidden><div class="progress-label"><span id="progressMessage">Preparing…</span><span id="progressPercent">0%</span></div><div class="progress"><span id="progressBar"></span></div></div>
-      <div class="player-tools"><button class="pill outline small" id="backBtn">← Previous</button><button class="pill dark small" id="generateBtn">Generate this chapter</button><button class="pill outline small" id="previewBtn">Preview in browser</button><button class="pill outline small" id="nextBtn">Next →</button><a class="pill outline small disabled" id="downloadBtn" href="#" download>Download WAV</a></div>
-    </section>
-  </div>
-</div>
-</section>
-
-<section class="shell stats"><div><strong id="wordCount">—</strong><span>words processed</span></div><div><strong id="chapterCount">—</strong><span>chapters shaped by NLP</span></div><div><strong id="modelName">Female MMS</strong><span>neural voice model</span></div><div><strong id="deviceName">—</strong><span>inference device</span></div></section>
+  <section class="stats-strip section-shell"><div><b id="wordCount">—</b><span>Words processed</span></div><div><b id="chapterCount">—</b><span>Chapters created</span></div><div><b id="modelName">Female MMS VITS</b><span>Neural voice model</span></div><div><b id="deviceName">On demand</b><span>Inference device</span></div></section>
 </main>
-<footer class="footer shell"><span>Generative Audiobook Studio</span><span>PDFMiner · NLTK · Female MMS VITS · SQLite</span></footer>
-<script src="app.js"></script>
+<footer class="footer"><div class="footer-brand">♫ &nbsp; Generative Audiobook Studio</div><span>Made for curious minds and good stories.</span><a href="#studio">Back to top ↑</a></footer>
+<script src="/app.js" defer></script>
 </body>
 </html>

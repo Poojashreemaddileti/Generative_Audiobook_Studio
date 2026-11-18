@@ -1,38 +1,23 @@
-import tempfile
-from pathlib import Path
+import unittest
+from nlp_pipeline import make_chapters
+from pdf_pipeline import clean_text
 
-from database import init_db, insert_book, get_book, get_pdf
 
+class PipelineTests(unittest.TestCase):
+    def test_clean_text(self):
+        self.assertEqual(clean_text("Hello\r\n\r\n\nWorld"), "Hello\n\nWorld")
 
-def test_database_roundtrip():
-    # Uses the application's SQLite schema; normal app initialization creates the DB.
-    init_db()
-    book_id = "test-book-db"
-    # Avoid duplicate failure if this test is run repeatedly by using a unique-ish filename.
-    book = {
-        "id": book_id,
-        "filename": "test.pdf",
-        "title": "Test Book",
-        "word_count": 4,
-        "character_count": 20,
-        "summary": "A test.",
-    }
-    try:
-        insert_book(book, b"%PDF-test", [{"title":"Chapter 1","text":"Hello world.","preview":"Hello world."}])
-        row, chapters = get_book(book_id)
-        assert row["title"] == "Test Book"
-        assert row["pdf_data"] == b"%PDF-test"
-        assert chapters[0]["title"] == "Chapter 1"
-        assert get_pdf(book_id)["pdf_data"] == b"%PDF-test"
-    finally:
-        import sqlite3
-        from config import DB_PATH
-        conn = sqlite3.connect(DB_PATH)
-        conn.execute("DELETE FROM books WHERE id=?", (book_id,))
-        conn.commit()
-        conn.close()
+    def test_detects_chapter_headings(self):
+        chapters = make_chapters("Chapter 1: Start\nFirst story.\n\nChapter 2: Next\nSecond story.", 1000)
+        self.assertEqual(len(chapters), 2)
+        self.assertIn("Chapter 1", chapters[0]["title"])
+        self.assertIn("Second story", chapters[1]["text"])
+
+    def test_splits_long_text(self):
+        chapters = make_chapters(" ".join(["word"] * 500), 300)
+        self.assertGreater(len(chapters), 1)
+        self.assertTrue(all(len(chapter["text"]) <= 300 for chapter in chapters))
 
 
 if __name__ == "__main__":
-    test_database_roundtrip()
-    print("database test passed")
+    unittest.main()

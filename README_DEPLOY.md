@@ -1,26 +1,12 @@
-# Free deployment guide
+# Deployment notes
 
-## Option A — Hugging Face Spaces (Docker)
+This project is a Flask application (not a Streamlit app). The included `run.bat` is intended for local Windows use.
 
-1. Create a new **Space** at Hugging Face.
-2. Choose **Docker** as the Space SDK.
-3. Upload the project files from this folder.
-4. The included `Dockerfile` starts Flask on port 7860.
-5. Open the Space URL and upload a PDF.
+For a server/container deployment, install the dependencies in `backend/requirements.txt` plus a compatible PyTorch build, then start the application with:
 
-The first neural generation downloads `facebook/mms-tts-eng`, so allow time for the initial model load. The browser preview works immediately without waiting for the model.
+```bash
+cd backend
+HOST=0.0.0.0 PORT=5000 FLASK_DEBUG=0 python app.py
+```
 
-## Option B — Render-style host
-
-Use:
-
-- Build: `pip install -r backend/requirements.txt`
-- Start: `python backend/app.py`
-
-The app reads `PORT` and binds to `0.0.0.0` automatically.
-
-Free instances can sleep and may have temporary filesystems. Generated WAV files should therefore be treated as temporary unless a persistent disk is enabled.
-
-## Free/no-paid-API behavior
-
-No OpenAI/ElevenLabs paid API is required. Neural narration uses the free/open Hugging Face model included in the application. The **Preview in browser** button uses the browser's own speech engine and is the fastest way to verify the complete PDF → NLP → listening flow before neural generation.
+Persist the project `data/` directory between deployments. The first generation downloads the configured Hugging Face model; make sure the deployment has outbound access to Hugging Face and enough memory/disk for PyTorch and the model. Do not expose an unauthenticated instance publicly: this starter project is designed for local/private use and does not include user authentication, rate limiting, or a production reverse proxy.

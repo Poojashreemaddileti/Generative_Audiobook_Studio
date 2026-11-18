@@ -9,10 +9,8 @@ from flask import Flask, jsonify, request, send_file, send_from_directory
 from flask_cors import CORS
 
 from config import MAX_UPLOAD_MB, MAX_CHAPTER_CHARS, MODEL_NAME
-from database import (
-    init_db, insert_book, get_book, list_books, get_pdf,
-    update_chapter_status, save_audio, get_audio,
-)
+from database import (init_db, insert_book, get_book, list_books, get_pdf,
+                      update_chapter_status, save_audio, get_audio)
 from pdf_pipeline import extract_pdf_text, clean_text
 from nlp_pipeline import make_chapters, summarize_for_ui
 from tts_engine import get_tts
@@ -20,10 +18,10 @@ from tts_engine import get_tts
 app = Flask(__name__)
 CORS(app)
 app.config["MAX_CONTENT_LENGTH"] = MAX_UPLOAD_MB * 1024 * 1024
-
 jobs = {}
 jobs_lock = Lock()
 init_db()
+FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
 
 
 def public_book(book_id):
@@ -31,29 +29,16 @@ def public_book(book_id):
     if row is None:
         raise FileNotFoundError(book_id)
     return {
-        "id": row["id"],
-        "filename": row["filename"],
-        "title": row["title"],
-        "status": row["status"],
-        "word_count": row["word_count"],
-        "character_count": row["character_count"],
-        "chapter_count": len(chapter_rows),
-        "summary": row["summary"],
-        "created_at": row["created_at"],
+        "id": row["id"], "filename": row["filename"], "title": row["title"],
+        "status": row["status"], "word_count": row["word_count"],
+        "character_count": row["character_count"], "chapter_count": len(chapter_rows),
+        "summary": row["summary"], "created_at": row["created_at"],
         "tts": {"model": row["tts_model"], "device": row["tts_device"]} if row["tts_model"] else None,
         "pdf_url": f"/api/books/{book_id}/pdf",
-        "chapters": [
-            {
-                "index": c["chapter_index"],
-                "title": c["title"],
-                "characters": c["characters"],
-                "preview": c["preview"],
-                "audio": f"/api/books/{book_id}/audio/{c['chapter_index']}" if c["audio_data"] else None,
-                "duration": c["duration"],
-                "status": c["status"],
-            }
-            for c in chapter_rows
-        ],
+        "chapters": [{"index": c["chapter_index"], "title": c["title"],
+                      "characters": c["characters"], "preview": c["preview"],
+                      "audio": f"/api/books/{book_id}/audio/{c['chapter_index']}" if c["audio_data"] else None,
+                      "duration": c["duration"], "status": c["status"]} for c in chapter_rows]
     }
 
 
@@ -67,6 +52,11 @@ def get_job(job_id):
         return dict(jobs.get(job_id, {"status": "missing"}))
 
 
+@app.errorhandler(413)
+def too_large(_error):
+    return jsonify({"error": f"The PDF is too large. Maximum upload size is {MAX_UPLOAD_MB} MB."}), 413
+
+
 @app.get("/api/health")
 def health():
     return jsonify({"ok": True, "service": "generative-audiobook", "tts_model": MODEL_NAME, "database": "SQLite"})
@@ -74,49 +64,39 @@ def health():
 
 @app.get("/api/library")
 def library():
-    return jsonify({"books": [
-        {
-            "id": r["id"], "filename": r["filename"], "title": r["title"],
-            "word_count": r["word_count"], "chapter_count": r["chapter_count"],
-            "status": r["status"], "created_at": r["created_at"],
-        } for r in list_books()
-    ]})
+    return jsonify({"books": [{"id": r["id"], "filename": r["filename"], "title": r["title"],
+                               "word_count": r["word_count"], "chapter_count": r["chapter_count"],
+                               "status": r["status"], "created_at": r["created_at"]} for r in list_books()]})
 
 
 @app.post("/api/books")
 def upload_book():
     pdf = request.files.get("pdf")
-    if not pdf or not pdf.filename.lower().endswith(".pdf"):
-        return jsonify({"error": "Please upload a PDF file."}), 400
-
+    if not pdf or not pdf.filename or not pdf.filename.lower().endswith(".pdf"):
+        return jsonify({"error": "Please choose a PDF file."}), 400
     pdf_data = pdf.read()
     if not pdf_data:
-        return jsonify({"error": "The PDF is empty."}), 400
-
+        return jsonify({"error": "The selected PDF is empty."}), 400
     book_id = uuid.uuid4().hex[:10]
     safe_name = re.sub(r"[^a-zA-Z0-9._-]+", "_", pdf.filename)
     temp_path = Path(__file__).resolve().parent.parent / "data" / f"_{book_id}_{safe_name}"
     temp_path.write_bytes(pdf_data)
     try:
-        raw = extract_pdf_text(temp_path)
-        text = clean_text(raw)
+        text = clean_text(extract_pdf_text(temp_path))
         if not text:
-            raise ValueError("No readable text was found. This may be a scanned/image-only PDF.")
-
+            raise ValueError("No readable text was found. This may be a scanned/image-only PDF. Please use a text-based PDF.")
         chapters = make_chapters(text, MAX_CHAPTER_CHARS)
-        title = Path(pdf.filename).stem.replace("_", " ").replace("-", " ").title()
-        book = {
-            "id": book_id,
-            "filename": pdf.filename,
-            "title": title,
-            "word_count": len(text.split()),
-            "character_count": len(text),
-            "summary": summarize_for_ui(text),
-        }
+        if not chapters:
+            raise ValueError("No chapters or readable text could be created from this PDF.")
+        book = {"id": book_id, "filename": pdf.filename,
+                "title": Path(pdf.filename).stem.replace("_", " ").replace("-", " ").title(),
+                "word_count": len(text.split()), "character_count": len(text),
+                "summary": summarize_for_ui(text)}
         insert_book(book, pdf_data, chapters)
         return jsonify(public_book(book_id))
     except Exception as exc:
-        return jsonify({"error": str(exc)}), 500
+        app.logger.exception("PDF processing failed")
+        return jsonify({"error": str(exc)}), 422
     finally:
         if temp_path.exists():
             temp_path.unlink()
@@ -145,13 +125,20 @@ def generate_chapter_worker(book_id, chapter_index, job_id):
             raise ValueError("Chapter does not exist.")
         chapter = chapters[chapter_index]
         update_chapter_status(book_id, chapter_index, "generating")
-        update_job(job_id, status="loading", message="Loading the female neural voice model…", progress=10)
+        update_job(job_id, status="loading", message="Loading the female neural voice model (first run may take a few minutes)…", progress=5)
         tts = get_tts()
-        update_job(job_id, status="generating", message="Creating clear, natural narration…", progress=45)
-        result = tts.synthesize(chapter["text"])
+        update_job(job_id, status="generating", message="Preparing chapter text…", progress=15)
+
+        def report_chunk(done, total):
+            percent = 15 + int((done / max(total, 1)) * 75)
+            update_job(job_id, status="generating", message=f"Creating narration · audio segment {done} of {total}", progress=percent)
+
+        result = tts.synthesize(chapter["text"], progress_callback=report_chunk)
+        update_job(job_id, status="saving", message="Saving your chapter audio…", progress=94)
         save_audio(book_id, chapter_index, result["audio_bytes"], result["seconds"], result["sample_rate"], result["model"], result["device"])
         update_job(job_id, status="done", message="Chapter ready to play.", progress=100, book=public_book(book_id))
     except Exception as exc:
+        app.logger.exception("Audio generation failed")
         update_chapter_status(book_id, chapter_index, "error")
         update_job(job_id, status="error", message=str(exc), progress=100)
 
@@ -162,19 +149,17 @@ def generate(book_id):
         book = public_book(book_id)
     except FileNotFoundError:
         return jsonify({"error": "Book not found."}), 404
-
     payload = request.get_json(silent=True) or {}
     try:
         chapter_index = int(payload.get("chapter", 0))
     except (TypeError, ValueError):
-        chapter_index = 0
+        return jsonify({"error": "Chapter index must be a number."}), 400
     if chapter_index < 0 or chapter_index >= len(book["chapters"]):
         return jsonify({"error": "Chapter does not exist."}), 400
     if book["chapters"][chapter_index].get("audio"):
         return jsonify({"status": "already_generated", "book": book})
-
     job_id = uuid.uuid4().hex[:12]
-    update_job(job_id, status="queued", message="Queued…", progress=0, book_id=book_id, chapter=chapter_index)
+    update_job(job_id, status="queued", message="Queued for generation…", progress=1, book_id=book_id, chapter=chapter_index)
     Thread(target=generate_chapter_worker, args=(book_id, chapter_index, job_id), daemon=True).start()
     return jsonify({"job_id": job_id, "status": "queued", "message": "Generation started."}), 202
 
@@ -191,11 +176,8 @@ def job_status(job_id):
 def audio(book_id, chapter_index):
     row = get_audio(book_id, chapter_index)
     if row is None or row["audio_data"] is None:
-        return jsonify({"error": "Chapter audio is not generated yet."}), 404
+        return jsonify({"error": "Chapter audio has not been generated yet."}), 404
     return send_file(io.BytesIO(row["audio_data"]), mimetype="audio/wav", download_name=f"chapter-{chapter_index + 1}.wav")
-
-
-FRONTEND = Path(__file__).resolve().parent.parent / "frontend"
 
 
 @app.get("/")
@@ -207,8 +189,8 @@ def index():
 def static_files(path):
     return send_from_directory(FRONTEND, path)
 
-if __name__ == "__main__":
-    host = "0.0.0.0"
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host=host, port=port)
 
+if __name__ == "__main__":
+    host = os.getenv("HOST", "127.0.0.1")
+    port = int(os.getenv("PORT", "5000"))
+    app.run(host=host, port=port, debug=os.getenv("FLASK_DEBUG", "0") == "1", threaded=True)
